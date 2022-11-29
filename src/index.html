@@ -1,0 +1,105 @@
+<html>
+    <head>
+        <script src="//cdn.jsdelivr.net/npm/phaser@3.20.0/dist/phaser.js"></script>
+    </head>
+    <body>
+
+        <script>
+            var config = {
+                //create config
+                type: Phaser.CANVAS,
+                width: 1000,
+                height: 600,
+                physics: {
+                    default: 'arcade',
+                    arcade: {
+                        debug:false
+                    }
+                },
+                scene: {
+                    preload: preload,
+                    create: create,
+                    update: update
+                }
+                
+            }
+            var game = new Phaser.Game(config); //create game obj
+
+            //global vars
+            var player;
+            var obstacles;
+            var cursors;
+            
+            var yLimit;
+            var xLimit;
+
+            function preload() {
+                this.load.spritesheet("base", "../assets/player-base.png", { frameWidth: 32, frameHeight: 32})
+                
+
+                this.load.image('floor', '../assets/floor.jpg');
+                this.load.image('circle', '../assets/circle.png')
+                this.load.image('obstacle', '../assets/obstacle.png')
+            }
+
+            function create() {//creates objects from assets at start of game
+                let background = this.add.image(0,0, 'floor');
+                background.x = background.displayWidth /2;
+                background.y = background.displayHeight/2;
+
+                //define player positive boundaries
+                xLimit = background.displayWidth;
+                yLimit = background.displayHeight;
+
+                this.anims.create({
+                    key:'walk-down',
+                    frameRate: 10,
+                    frames: this.anims.generateFrameNumbers('base', { start: 5, end: 8 })
+                })
+
+                player = this.physics.add.sprite(300,300, 'circle');//create player sprite
+
+                player.setScale(0.4); //downscale player sprite
+
+
+                cursors = this.input.keyboard.createCursorKeys();
+
+                this.cameras.main.setBounds(0,0,xLimit,yLimit)
+
+                obstacles = this.physics.add.staticGroup(); //Create group
+                obstacles.create(800,600, 'obstacle')
+                obstacles.create(900,800,'obstacle')
+
+                this.physics.add.collider(player, obstacles); //collision detection
+            }
+
+            function update() {
+                //Runs every frame
+                if(cursors.left.isDown && player.x >=0){
+                    player.setVelocityX(-200); //go left
+                }
+                else if(cursors.right.isDown && player.x <=xLimit){
+                    player.setVelocityX(200); //go right
+                }
+                else {
+                    player.setVelocityX(0)
+                }
+                
+                if (cursors.up.isDown && player.y >=0){
+                    player.setVelocityY(-200)
+                }
+                else if (cursors.down.isDown && player.y <= yLimit) {
+                    player.setVelocityY(200)
+                }
+                else{
+                    player.setVelocityY(0)
+                }
+
+                this.cameras.main.centerOn(player.x, player.y);
+                
+            }
+
+
+        </script>
+    </body>
+</html>
